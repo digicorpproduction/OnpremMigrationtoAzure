@@ -1,0 +1,30 @@
+ASR replication policy example:
+
+This PowerShell script creates a replication policy named "MyReplicationPolicy" with the following settings:
+
+RecoveryPointRetentionRangeInHours: The number of hours for which recovery points are retained. In this example, recovery points are retained for 24 hours.
+
+ApplicationConsistentSnapshotFrequencyInHours: The frequency at which application-consistent snapshots are taken. In this example, application-consistent snapshots are taken every 4 hours.
+
+InitialReplicationDurationInHours: The time window for the initial replication of the server to Azure. In this example, the initial replication takes 24 hours.
+
+You can adjust these settings to meet your specific requirements. For example, if you need to retain recovery points or application-consistent snapshots for a longer period of time, you can increase these values.
+
+Once you have created the replication policy, you can use it to enable replication for your on-premise server. Here is an example of how to enable replication for an on-premise server using the replication policy:
+
+powershell
+Copy code
+# Enable replication for your server
+$ServerArgs = @{
+    Name = "server1"
+    IPAddress = "10.0.0.3"
+    ProtectionContainerMapping = (Get-AzureRmSiteRecoveryProtectionContainerMapping -VaultContext $VaultContext -ProtectionContainer $ProtectionContainerName).ID
+    ReplicationPolicy = (Get-AzureRmSiteRecoveryPolicy -Name $ReplicationPolicyName).ID
+}
+Enable-AzureRmSiteRecoveryProtection -InputObject $ServerArgs
+This PowerShell script enables replication for an on-premise server named "server1" with IP address "10.0.0.3" using the replication policy named "MyReplicationPolicy". Once replication is enabled, the on-premise server will start replicating to Azure based on the settings specified in the replication policy.
+
+Remember to replace the placeholder values in the script with your actual values. For example, replace "server1" with the name of your server and "10.0.0.3" with your server's IP address.
+
+
+

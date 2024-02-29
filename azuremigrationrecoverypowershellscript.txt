@@ -1,0 +1,65 @@
+# Install the Azure Site Recovery Provider on your server
+$ProviderPackagePath = "C:\Temp\ASR\MicrosoftAzureSiteRecoveryProvider.msi"
+$ProviderArgs = "/q"
+Start-Process -FilePath $ProviderPackagePath -ArgumentList $ProviderArgs -Wait
+
+# Register your server with the Azure Site Recovery vault
+$VaultName = "your-vault-name"
+$ResourceGroupName = "your-resource-group-name"
+$ASRServerName = "your-asr-server-name"
+$SubscriptionId = "your-subscription-id"
+$FabricName = "your-fabric-name"
+$ProtectionContainerName = "your-protection-container-name"
+$TargetResourceGroup = "your-target-resource-group-name"
+$TargetSubscription = "your-target-subscription-id"
+
+$VaultContext = Add-AzureRmAccount -ResourceGroupName $ResourceGroupName -VaultName $VaultName
+Add-AzureRmSiteRecoveryServer -VaultContext $VaultContext -Name $ASRServerName -SubscriptionId $SubscriptionId
+New-AzureRmSiteRecoveryProtectionContainer -VaultContext $VaultContext -Name $ProtectionContainerName -Fabric $FabricName
+New-AzureRmSiteRecoveryProtectionContainerMapping -VaultContext $VaultContext -ProtectionContainer $ProtectionContainerName -TargetResourceGroup $TargetResourceGroup -TargetSubscription $TargetSubscription
+
+# Create a replication policy for your server
+$ReplicationPolicyName = "your-replication-policy-name"
+$PolicyArgs = @{
+    Name = $ReplicationPolicyName
+    SourceResourceId = (Get-AzureRmSiteRecoveryProtectionContainer -VaultContext $VaultContext -Name $ProtectionContainerName).ID
+    TargetResourceId = (Get-AzureRmSiteRecoveryTargetResource -VaultContext $VaultContext -ResourceGroupName $TargetResourceGroup -Name $TargetSubscription).ID
+    FriendlyName = $ReplicationPolicyName
+    TargetWorkloadType = "HyperV"
+    RecoveryPointRetentionRangeInHours = 24
+    ApplicationConsistentSnapshotFrequencyInHours = 4
+}
+New-AzureRmSiteRecoveryPolicy -InputObject $PolicyArgs
+
+# Enable replication for your server
+$ServerArgs = @{
+    Name = "server1"
+    IPAddress = "10.0.0.3"
+    ProtectionContainerMapping = (Get-AzureRmSiteRecoveryProtectionContainerMapping -VaultContext $VaultContext -ProtectionContainer $ProtectionContainerName).ID
+    ReplicationPolicy = (Get-AzureRmSiteRecoveryPolicy -Name $ReplicationPolicyName).ID
+}
+Enable-AzureRmSiteRecoveryProtection -InputObject $ServerArgs
+
+# Run a test failover to ensure that your server can be migrated successfully
+$ServerArgs = @{
+    Name = "server1"
+    TestFailover = $true
+    TargetSubscription = $TargetSubscription
+    TargetResourceGroup = $TargetResourceGroup
+}
+Start-AzureRmSiteRecoveryJob -InputObject $ServerArgs
+
+# Run a final failover to migrate your server to Azure
+$ServerArgs = @{
+    Name = "server1"
+    Failover = $true
+    TargetSubscription = $TargetSubscription
+    TargetResourceGroup = $TargetResourceGroup
+}
+Start-AzureRmSiteRecoveryJob -InputObject $ServerArgs
+
+# Update your server's IP address in Azure
+$VirtualNetworkName = "your-virtual-network-name"
+$SubnetName = "your-subnet-name"
+$NICName = "your-nic-name"
+$AzureVMName =

@@ -1,0 +1,14 @@
+The best migration method to use to migrate an on-premise server to Azure cloud depends on several factors, including the type of server, the size of the server, the complexity of the application, and the network configuration.
+
+However, Azure Site Recovery (ASR) is a popular and widely-used migration method that can be used to migrate a wide range of servers and applications to Azure. ASR allows you to replicate your on-premise servers to Azure, and then failover to Azure when you are ready to migrate. This approach allows you to test the migration process before committing to it, and minimizes downtime during the migration.
+
+ASR supports several types of servers, including physical servers, VMware virtual machines, and Hyper-V virtual machines. It also supports a wide range of operating systems, including Windows Server, Linux, and Oracle Solaris.
+
+Another option to consider is Azure Migrate, which is a service that helps you migrate your servers to Azure. Azure Migrate provides an assessment and migration toolset that can be used to migrate physical servers, VMware virtual machines, and Hyper-V virtual machines.
+
+In general, ASR is a good choice for complex migrations that involve multiple servers or applications, while Azure Migrate is a good choice for simpler migrations that involve a single server or a small number of servers.
+
+It's important to note that migrating an on-premise server to Azure cloud involves several steps, including assessing the server, preparing it for migration, choosing a migration method, migrating the server, and configuring it in Azure. It's important to carefully plan and test the migration process to ensure that it is successful and minimizes downtime.
+
+
+
